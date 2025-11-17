@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   robots: 'index, follow',
   openGraph: {
     title: 'Free PDF to Word Converter Online | Fast & Accurate',
-    description: 'Convert PDF to Word (DOCX) online for free. Fast, accurate and secure PDF to Word converter. No signup.',
+    description: 'Convert PDF to Word (DOCX) online for free. Fast, accurate and secure. No signup required.',
     url: 'https://pdf2word.all2ools.com/',
     type: 'website',
     images: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: 'https://pdf2word.all2ools.com/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'PDF2Word & Word2PDF Converter',
+        alt: 'PDF2Word Converter',
       },
     ],
     siteName: 'PDF2Word',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free PDF to Word Converter Online',
-    description: 'Fast, secure and free PDF to Word converter.',
+    description: 'Fast, secure and accurate PDF to Word converter.',
     images: ['https://pdf2word.all2ools.com/og-image.png'],
   },
   metadataBase: new URL('https://pdf2word.all2ools.com'),
