@@ -17,22 +17,22 @@ export const metadata: Metadata = {
       'Convert PDF to Word (DOCX) online for free. Fast, accurate, and secure PDF to Word converter. No sign-up required.',
     images: [
       {
-        url: 'https://yourwebsite.com/images/pdf-converter-preview.png',
+        url: 'https://pdf2word.all2ools.com/images/pdf-converter-preview.png',
         width: 1200,
         height: 630,
         alt: 'PDF2Word & Word2PDF Converter',
       },
     ],
-    url: 'https://yourwebsite.com/',
+    url: 'https://pdf2word.all2ools.com/',
     siteName: 'PDF2Word',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Free PDF to Word Converter Online | Fast & Accurate | PDF2Word',
     description: 'Convert PDF to Word or Word to PDF instantly — free, no login, and secure.',
-    images: ['https://yourwebsite.com/images/pdf-converter-preview.png'],
+    images: ['https://pdf2word.all2ools.com/images/pdf-converter-preview.png'],
   },
-  metadataBase: new URL('https://yourwebsite.com'),
+  metadataBase: new URL('https://pdf2word.all2ools.com'),
   alternates: {
     canonical: '/',
   },
@@ -54,7 +54,7 @@ export default function RootLayout({
               "@type": "WebPage",
               "name": "Free PDF to Word Converter Online",
               "description": "Convert PDF to Word (DOCX) online for free. Fast, accurate, and secure PDF to Word converter. No sign-up required.",
-              "url": "https://yourwebsite.com/",
+              "url": "https://pdf2word.all2ools.com/",
               "mainEntity": {
                 "@type": "SoftwareApplication",
                 "name": "PDF2Word Converter",
