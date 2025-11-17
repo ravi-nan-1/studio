@@ -10,8 +10,11 @@ export default function Home() {
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         <h1 className="text-4xl md:text-5xl font-bold font-headline text-center my-8">
-          Free PDF to Word Converter (Fast & Accurate)
+          Free PDF to Word Converter – Fast, Accurate & No Signup
         </h1>
+        <p className="text-lg text-muted-foreground text-center max-w-3xl mb-8">
+          A PDF to Word converter is an online tool that transforms a PDF file into an editable Microsoft Word document (in .docx format). While PDFs are perfect for sharing and printing, they are difficult to edit. That’s why converting a PDF to Word is essential when you want to update information, fix formatting, or reuse content. Our free PDF to Word converter unlocks your PDF, allowing you to make changes instantly in Word, Google Docs, or any text editor.
+        </p>
         <FileConverter />
         <TrustAndSecurity />
         <SeoContent />
