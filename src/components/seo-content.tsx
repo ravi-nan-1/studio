@@ -24,8 +24,10 @@ export function SeoContent() {
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Free OCR PDF to Word:</strong> Convert scanned PDFs to editable text without paying for premium tools.</div></li>
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>No Registration Required:</strong> Use the converter instantly — no email, no login.</div></li>
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>100% Free and Unlimited:</strong> Convert as many PDFs as you want with no daily limits.</div></li>
+            <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>No Watermarks:</strong> Your converted Word file has no watermarks, no branding, and no restrictions.</div></li>
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Private & Secure:</strong> Your files are protected with SSL encryption, automatically deleted after one hour, and never stored or shared.</div></li>
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Works on All Devices:</strong> Use it on Windows, macOS, iPhone, Android, and Linux.</div></li>
+            <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Generous File Size Limit:</strong> You can convert PDF files up to 50MB instantly. Larger PDFs are also supported but may take longer.</div></li>
         </ul>
       </section>
 
