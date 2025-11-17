@@ -46,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <head>
+        <link rel="canonical" href="https://pdf2word.all2ools.com/" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
