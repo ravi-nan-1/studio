@@ -3,6 +3,7 @@ import { Header } from "@/components/header";
 import { TrustAndSecurity } from "@/components/trust-and-security";
 import { SeoContent } from "@/components/seo-content";
 import { RelatedTools } from "@/components/related-tools";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -22,7 +23,7 @@ export default function Home() {
         <RelatedTools />
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground bg-slate-50 dark:bg-slate-900 border-t">
-        © {new Date().getFullYear()} PDF2Word. All Rights Reserved.
+        © {new Date().getFullYear()} PDF2Word. A part of <Link href="https://www.all2ools.com/" className="underline" target="_blank" rel="noopener noreferrer">All2ools.com</Link>
       </footer>
     </div>
   );
