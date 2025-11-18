@@ -15,7 +15,7 @@ const tools = [
   },
   {
     name: "More PDF Tools",
-    href: "https://all2ools.com/tools",
+    href: "https://all2ools.com",
     description: "Explore our full suite of online tools."
   }
 ];
