@@ -183,8 +183,8 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
 
     const newFileName = file.name.replace(/\.[^/.]+$/, "") + newExtension;
     
-    // Simulate file download
-    const blob = new Blob(["This is a simulated converted file."], { type: mimeType });
+    // Simulate file download with a valid empty blob
+    const blob = new Blob([], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
