@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, useEffect, type ChangeEvent } from "react";
+import { useState, useMemo, type ChangeEvent } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<ConversionStatus>("idle");
   const [progress, setProgress] = useState(0);
+  const [convertedFile, setConvertedFile] = useState<{ blob: Blob, name: string } | null>(null);
   const { toast } = useToast();
 
   const onTabChange = (value: string) => {
@@ -33,6 +34,12 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
     setFile(null);
     setStatus("idle");
     setProgress(0);
+    setConvertedFile(null);
+    // Also reset the file input element
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   const conversionInfo = useMemo(() => {
@@ -113,82 +120,83 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
     }
   };
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (!file) return;
 
     setStatus("converting");
     setProgress(0);
-  };
-  
-  useEffect(() => {
-    if (status !== 'converting') return;
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return prev + 5;
+    const animateProgress = () => {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 95) {
+            clearInterval(interval);
+            return 95;
+          }
+          return prev + 5;
+        });
+      }, 100);
+      return interval;
+    };
+    const progressInterval = animateProgress();
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("conversionType", conversionType);
+
+      const response = await fetch('/api/convert', {
+        method: 'POST',
+        body: formData,
       });
-    }, 100);
 
-    const conversionTimeout = setTimeout(() => {
-      clearInterval(interval);
+      clearInterval(progressInterval);
       setProgress(100);
+
+      if (!response.ok) {
+        throw new Error(`Conversion failed: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = "converted-file";
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+        if (filenameMatch && filenameMatch.length > 1) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      setConvertedFile({ blob, name: filename });
       setStatus("done");
       toast({
         title: "Conversion Successful!",
         description: "Your file is ready for download.",
       });
-    }, 2500);
-    
-    return () => {
-      clearInterval(interval);
-      clearTimeout(conversionTimeout);
-    };
 
-  }, [status, toast]);
+    } catch (error) {
+      clearInterval(progressInterval);
+      setStatus("error");
+      console.error(error);
+      toast({
+        title: "Conversion Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        variant: "destructive",
+      });
+      // Allow user to try again
+      setTimeout(() => {
+        setStatus("uploading");
+      }, 2000);
+    }
+  };
 
   const handleDownload = () => {
-    if (!file) return;
-    let newExtension;
-    let mimeType;
-
-    switch(conversionType) {
-        case "pdf-to-word":
-            newExtension = ".docx";
-            mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            break;
-        case "word-to-pdf":
-            newExtension = ".pdf";
-            mimeType = "application/pdf";
-            break;
-        case "pdf-to-jpg":
-            newExtension = ".jpg";
-            mimeType = "image/jpeg";
-            break;
-        case "jpg-to-pdf":
-            newExtension = ".pdf";
-            mimeType = "application/pdf";
-            break;
-        case "pdf-to-excel":
-            newExtension = ".xlsx";
-            mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            break;
-        default:
-            newExtension = ".zip";
-            mimeType = "application/zip";
-    }
-
-    const newFileName = file.name.replace(/\.[^/.]+$/, "") + newExtension;
+    if (!convertedFile) return;
     
-    // Simulate file download with a valid empty blob
-    const blob = new Blob([], { type: mimeType });
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(convertedFile.blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = newFileName;
+    a.download = convertedFile.name;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -196,7 +204,7 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
 
     toast({
       title: "Download Started",
-      description: `Downloading ${newFileName}.`,
+      description: `Downloading ${convertedFile.name}.`,
     });
   };
 
@@ -254,11 +262,12 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
               onChange={handleFileChange}
               accept={accept}
               aria-label={`Upload ${fromType} file`}
+              disabled={status !== 'idle' && status !== 'uploading'}
             />
           </div>
         ) : null}
 
-        {file && (status === "uploading" || status === "converting" || status === "done") && (
+        {file && (status === "uploading" || status === "converting" || status === "done" || status === 'error') && (
           <div className="border rounded-lg p-4 flex items-center justify-between bg-secondary/50">
             <div className="flex items-center gap-3 overflow-hidden">
               {fromIcon}
@@ -305,3 +314,5 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
     );
   }
 }
+
+    
