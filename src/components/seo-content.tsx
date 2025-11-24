@@ -1,6 +1,6 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Check } from "lucide-react";
+import { Check, Star, Zap, Gem } from "lucide-react";
 
 export function SeoContent() {
   return (
@@ -29,6 +29,69 @@ export function SeoContent() {
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Works on All Devices:</strong> Use it on Windows, macOS, iPhone, Android, and Linux.</div></li>
             <li className="flex items-start"><Check className="h-6 w-6 text-green-500 mr-2 mt-1 shrink-0" /> <div><strong>Generous File Size Limit:</strong> You can convert PDF files up to 50MB instantly. Larger PDFs are also supported but may take longer.</div></li>
         </ul>
+      </section>
+
+      <section>
+        <h2 className="text-3xl font-bold mb-4">Full Suite of PDF Tools</h2>
+        <p className="mb-6">Beyond PDF to Word, our platform offers a complete set of tools to handle any document task.</p>
+
+        <div className="space-y-8">
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 flex items-center"><Star className="h-6 w-6 text-yellow-500 mr-2" /> Core PDF Tools</h3>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
+              <span>PDF → Word (DOCX)</span>
+              <span>Word → PDF</span>
+              <span>PDF → JPG</span>
+              <span>JPG → PDF</span>
+              <span>PDF → Excel</span>
+              <span>Excel → PDF</span>
+              <span>PDF → PowerPoint</span>
+              <span>PPT → PDF</span>
+              <span>HTML → PDF</span>
+              <span>Compress PDF</span>
+              <span>Merge PDF</span>
+              <span>Split PDF</span>
+              <span>Extract pages</span>
+              <span>Delete pages</span>
+              <span>Reorder pages</span>
+              <span>Rotate pages</span>
+              <span>Add Watermark</span>
+              <span>Add Page Numbers</span>
+              <span>Protect PDF</span>
+              <span>Unlock PDF</span>
+              <span>Repair PDF</span>
+              <span>Convert to PDF/A</span>
+              <span>OCR PDF → Word</span>
+              <span>Edit PDF</span>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 flex items-center"><Zap className="h-6 w-6 text-blue-500 mr-2" /> Advanced Features</h3>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
+              <span>Batch processing</span>
+              <span>Chained workflows</span>
+              <span>Cloud uploads</span>
+              <span>File viewer</span>
+              <span>Dark mode UI</span>
+              <span>Offline Desktop app</span>
+              <span>API Endpoints</span>
+              <span>Mobile responsive</span>
+              <span>Secure file deletion</span>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 flex items-center"><Gem className="h-6 w-6 text-purple-500 mr-2" /> Premium Features (Optional)</h3>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
+              <span>eSignatures</span>
+              <span>Team Workspace</span>
+              <span>Unlimited file size</span>
+              <span>Unlimited batch tools</span>
+              <span>Ad-free mode</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section>
