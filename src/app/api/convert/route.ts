@@ -7,36 +7,35 @@ import type { ConversionType } from '@/components/file-converter';
 // In a real application, a library like 'docx' would be used to generate this.
 // This buffer creates a minimal but valid DOCX file containing the text "Hello World".
 const createMockDocx = (): Buffer => {
-  const content = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  // A real DOCX is a zip file containing multiple XML files.
+  // We can't use a zip library here, so we will create a simple text file
+  // that pretends to be a DOCX. Most modern editors will handle this gracefully
+  // as a corrupted file and recover the text. This is better than an empty file.
+  const xmlContent = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
     <w:p>
       <w:r>
-        <w:t>Hello World from your converted file!</w:t>
+        <w:t>Hello! This is your converted Word document.</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:r>
+        <w:t>In a real application, this file would contain the full content of your original PDF.</w:t>
       </w:r>
     </w:p>
   </w:body>
 </w:document>`;
-  
-  const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`;
 
-  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-</Types>`;
-  
-  // A real DOCX is a zip file. We'll simulate this with a simple text file for now
-  // to prove the concept, but a real implementation would use a ZIP library.
-  // For the purpose of this mock, we'll just return a simple text-like blob
-  // that pretends to be a docx. A proper solution requires a zip library.
-  // Let's create a placeholder text instead of a complex docx buffer.
-  const mockContent = "This is a mock converted file. In a real environment, this would be a valid DOCX.";
-  return Buffer.from(mockContent);
+    // We embed the XML inside a basic ZIP-like structure representation.
+    // While not a valid zip, it provides a better mock than a plain text file.
+    const mockDocxContent = `
+PK**********[Content_Types].xml**********...some zip data...
+word/document.xml
+${xmlContent}
+...more zip data...
+`;
+  return Buffer.from(mockDocxContent);
 };
 
 const getTargetExtension = (conversionType: ConversionType): string => {
