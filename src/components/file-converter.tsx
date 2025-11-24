@@ -135,24 +135,30 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
   const handleDownload = () => {
     if (!file) return;
     let newExtension;
+    let mimeType;
+
     switch(conversionType) {
         case "pdf-to-word":
             newExtension = ".docx";
+            mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
             break;
         case "word-to-pdf":
             newExtension = ".pdf";
+            mimeType = "application/pdf";
             break;
         case "pdf-to-jpg":
             newExtension = ".jpg";
+            mimeType = "image/jpeg";
             break;
         default:
             newExtension = ".zip";
+            mimeType = "application/zip";
     }
 
     const newFileName = file.name.replace(/\.[^/.]+$/, "") + newExtension;
     
     // Simulate file download
-    const blob = new Blob(["This is a simulated converted file."], { type: 'application/octet-stream' });
+    const blob = new Blob(["This is a simulated converted file."], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
