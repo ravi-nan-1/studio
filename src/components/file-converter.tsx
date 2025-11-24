@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, FileText, FileSignature, ArrowRight, Download, X, FileImage } from "lucide-react";
 
-export type ConversionType = "pdf-to-word" | "word-to-pdf" | "pdf-to-jpg";
+export type ConversionType = "pdf-to-word" | "word-to-pdf" | "pdf-to-jpg" | "jpg-to-pdf";
 type ConversionStatus = "idle" | "uploading" | "converting" | "done" | "error";
 
 interface FileConverterProps {
@@ -63,6 +63,15 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
           fromType: "PDF",
           toType: "JPG",
           accept: "application/pdf",
+        };
+      case "jpg-to-pdf":
+        return {
+          title: "JPG to PDF",
+          fromIcon: <FileImage className="h-10 w-10 text-primary" />,
+          toIcon: <FileText className="h-10 w-10 text-destructive" />,
+          fromType: "JPG",
+          toType: "PDF",
+          accept: "image/jpeg",
         };
       default:
         return {
@@ -149,6 +158,10 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
         case "pdf-to-jpg":
             newExtension = ".jpg";
             mimeType = "image/jpeg";
+            break;
+        case "jpg-to-pdf":
+            newExtension = ".pdf";
+            mimeType = "application/pdf";
             break;
         default:
             newExtension = ".zip";

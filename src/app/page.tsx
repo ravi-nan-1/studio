@@ -32,6 +32,11 @@ export default function Home() {
           title: "Free PDF to JPG Converter – High Quality Images",
           subtitle: "Convert PDF to JPG Online (Fast & Free)"
         };
+      case "jpg-to-pdf":
+        return {
+          title: "Free JPG to PDF Converter – Simple & Secure",
+          subtitle: "Convert JPG to PDF Online (Fast & Free)"
+        };
       default:
         return {
           title: "Free PDF to Word Converter – Fast, Accurate & No Signup",
