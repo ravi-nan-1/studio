@@ -7,7 +7,7 @@ import {
   FileCode,
   Shrink,
   Combine,
-  SplitSquare,
+  Split,
   Grab,
   BookCopy,
   RotateCcw,
@@ -49,7 +49,7 @@ const coreTools = [
   { name: "HTML to PDF", icon: <FileCode /> },
   { name: "Compress PDF", icon: <Shrink /> },
   { name: "Merge PDF", icon: <Combine /> },
-  { name: "Split PDF", icon: <SplitSquare /> },
+  { name: "Split PDF", icon: <Split /> },
   { name: "Extract pages", icon: <BookCopy /> },
   { name: "Delete pages", icon: <Grab /> },
   { name: "Reorder pages", icon: <Layers /> },
@@ -103,7 +103,7 @@ const Section = ({ title, children, icon }: { title: string, children: React.Rea
       {children}
     </div>
   </section>
-)
+);
 
 export function FeatureGrid() {
   return (
