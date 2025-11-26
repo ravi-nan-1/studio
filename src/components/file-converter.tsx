@@ -145,8 +145,19 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
       clearInterval(progressInterval);
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        const errorMessage = errorData?.message || `Conversion failed with status: ${response.status}`;
+        let errorMessage = `Conversion failed with status: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            if (typeof errorData.message === 'string') {
+                errorMessage = errorData.message;
+            }
+        } catch (e) {
+            // response is not json, use text
+            const textError = await response.text();
+            if (textError && !textError.trim().startsWith('<')) { // check if not html
+              errorMessage = textError;
+            }
+        }
         throw new Error(errorMessage);
       }
       
@@ -209,6 +220,12 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
   
   const isTabbedTool = conversionType === 'pdf-to-word' || conversionType === 'word-to-pdf';
 
+  const MainContent = (
+    <div className="pt-6">
+      <FileDropZone key={conversionType} />
+    </div>
+  );
+
   return (
     <Card className="w-full max-w-2xl shadow-xl border-t-4 border-primary">
       <CardHeader className="text-center">
@@ -222,14 +239,15 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
               <TabsTrigger value="pdf-to-word">PDF to Word</TabsTrigger>
               <TabsTrigger value="word-to-pdf">Word to PDF</TabsTrigger>
             </TabsList>
-            <TabsContent value={conversionType} className="pt-6" forceMount>
-               <FileDropZone key={conversionType} />
+            <TabsContent value="pdf-to-word" className="pt-6" forceMount={conversionType === 'pdf-to-word'}>
+              {conversionType === 'pdf-to-word' && MainContent}
+            </TabsContent>
+            <TabsContent value="word-to-pdf" className="pt-6" forceMount={conversionType === 'word-to-pdf'}>
+              {conversionType === 'word-to-pdf' && MainContent}
             </TabsContent>
           </Tabs>
         ) : (
-          <div className="pt-6">
-            <FileDropZone key={conversionType} />
-          </div>
+          MainContent
         )}
       </CardContent>
     </Card>
@@ -338,3 +356,5 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
     );
   }
 }
+
+    
