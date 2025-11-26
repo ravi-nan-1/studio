@@ -38,6 +38,14 @@ export const metadata: Metadata = {
   },
 };
 
+function PingBackend() {
+  React.useEffect(() => {
+    fetch('/api/ping').catch(console.error);
+  }, []);
+  return null;
+}
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
