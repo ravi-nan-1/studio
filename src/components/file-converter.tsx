@@ -32,35 +32,7 @@ interface FileConverterProps {
   setConversionType: (type: ConversionType) => void;
 }
 
-export function FileConverter({ conversionType, setConversionType }: FileConverterProps) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [status, setStatus] = useState<ConversionStatus>("idle");
-  const [progress, setProgress] = useState(0);
-  const [convertedFile, setConvertedFile] = useState<{ blob: Blob, name: string } | null>(null);
-  const [additionalParams, setAdditionalParams] = useState<Record<string, string>>({});
-  const { toast } = useToast();
-
-  const onTabChange = (value: string) => {
-    setConversionType(value as ConversionType);
-  };
-  
-  useEffect(() => {
-    resetState();
-  }, [conversionType]);
-
-  const resetState = () => {
-    setFiles([]);
-    setStatus("idle");
-    setProgress(0);
-    setConvertedFile(null);
-    setAdditionalParams({});
-    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
-  };
-
-  const conversionInfo = useMemo(() => {
+const getConversionInfo = (conversionType: ConversionType) => {
     const baseInfo = {
         accept: 'application/pdf',
         multiple: false,
@@ -92,7 +64,38 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
         case "edit-pdf": return { ...baseInfo, title: "Edit PDF", actionText: "Add Text to PDF", fromType: "PDF", toType: "PDF", params: [{ id: 'text', label: 'Text to add', type: 'text' }, {id: 'x', label: 'X coordinate', type: 'number'}, {id: 'y', label: 'Y coordinate', type: 'number'}] };
         default: return { ...baseInfo, title: "PDF to Word", actionText: "Convert to Word", fromIcon: <FileText className="h-10 w-10 text-destructive" />, toIcon: <FileSignature className="h-10 w-10 text-primary" />, fromType: "PDF", toType: "Word" };
     }
+};
+
+export function FileConverter({ conversionType, setConversionType }: FileConverterProps) {
+  const [files, setFiles] = useState<File[]>([]);
+  const [status, setStatus] = useState<ConversionStatus>("idle");
+  const [progress, setProgress] = useState(0);
+  const [convertedFile, setConvertedFile] = useState<{ blob: Blob, name: string } | null>(null);
+  const [additionalParams, setAdditionalParams] = useState<Record<string, string>>({});
+  const { toast } = useToast();
+  
+  const conversionInfo = useMemo(() => getConversionInfo(conversionType), [conversionType]);
+
+  const onTabChange = (value: string) => {
+    setConversionType(value as ConversionType);
+  };
+  
+  useEffect(() => {
+    resetState();
   }, [conversionType]);
+
+  const resetState = () => {
+    setFiles([]);
+    setStatus("idle");
+    setProgress(0);
+    setConvertedFile(null);
+    setAdditionalParams({});
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -145,19 +148,29 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
       clearInterval(progressInterval);
       
       if (!response.ok) {
-        let errorMessage = `Conversion failed with status: ${response.status}`;
+        let errorMessage = `Conversion failed with status ${response.status}`;
         try {
-            const errorData = await response.json();
-            if (typeof errorData.message === 'string') {
-                errorMessage = errorData.message;
+            const errorBody = await response.text();
+            if (response.headers.get('Content-Type')?.includes('application/json')) {
+                const errorJson = JSON.parse(errorBody);
+                 if (errorJson.message) {
+                    errorMessage = errorJson.message;
+                 } else if (errorJson.detail) {
+                    if (typeof errorJson.detail === 'string') {
+                        errorMessage = errorJson.detail;
+                    } else if (Array.isArray(errorJson.detail) && errorJson.detail[0]?.msg) {
+                        errorMessage = errorJson.detail.map((d: any) => `${d.loc.join(' -> ')}: ${d.msg}`).join(', ');
+                    } else {
+                        errorMessage = JSON.stringify(errorJson.detail);
+                    }
+                 }
+            } else if (errorBody && !errorBody.trim().startsWith('<')) {
+                errorMessage = errorBody;
             }
         } catch (e) {
-            // response is not json, use text
-            const textError = await response.text();
-            if (textError && !textError.trim().startsWith('<')) { // check if not html
-              errorMessage = textError;
-            }
+            // Parsing failed, do nothing and keep the default message
         }
+        
         throw new Error(errorMessage);
       }
       
@@ -221,8 +234,22 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
   const isTabbedTool = conversionType === 'pdf-to-word' || conversionType === 'word-to-pdf';
 
   const MainContent = (
-    <div className="pt-6">
-      <FileDropZone key={conversionType} />
+     <div className="pt-6">
+       <FileDropZone
+        key={conversionType}
+        conversionInfo={conversionInfo}
+        status={status}
+        files={files}
+        additionalParams={additionalParams}
+        progress={progress}
+        convertedFile={convertedFile}
+        handleFileChange={handleFileChange}
+        handleParamChange={handleParamChange}
+        handleConvert={handleConvert}
+        handleDownload={handleDownload}
+        resetState={resetState}
+        setFiles={setFiles}
+      />
     </div>
   );
 
@@ -239,10 +266,10 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
               <TabsTrigger value="pdf-to-word">PDF to Word</TabsTrigger>
               <TabsTrigger value="word-to-pdf">Word to PDF</TabsTrigger>
             </TabsList>
-            <TabsContent value="pdf-to-word" className="pt-6" forceMount={conversionType === 'pdf-to-word'}>
+            <TabsContent value="pdf-to-word" className="pt-6">
               {conversionType === 'pdf-to-word' && MainContent}
             </TabsContent>
-            <TabsContent value="word-to-pdf" className="pt-6" forceMount={conversionType === 'word-to-pdf'}>
+            <TabsContent value="word-to-pdf" className="pt-6">
               {conversionType === 'word-to-pdf' && MainContent}
             </TabsContent>
           </Tabs>
@@ -252,109 +279,133 @@ export function FileConverter({ conversionType, setConversionType }: FileConvert
       </CardContent>
     </Card>
   );
-
-  function FileDropZone() {
-    const { fromIcon, toIcon, fromType, actionText, accept, multiple, params } = conversionInfo;
-
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-center items-center gap-6">
-          {fromIcon}
-          <ArrowRight className="h-8 w-8 text-muted-foreground" />
-          {toIcon}
-        </div>
-
-        {status === "idle" || status === "file-selected" ? (
-          <div className="relative border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary transition-colors group">
-            <div className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10 transition-opacity rounded-lg" />
-            <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 font-semibold text-foreground">
-              Drop your {fromType} file{multiple ? 's' : ''} here
-            </p>
-            <p className="text-sm text-muted-foreground">or click to browse</p>
-            <Input
-              id="file-upload"
-              type="file"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={handleFileChange}
-              accept={accept}
-              multiple={multiple}
-              aria-label={`Upload ${fromType} file`}
-            />
-          </div>
-        ) : null}
-
-        {files.length > 0 && (status === "file-selected" || status === "converting" || status === "done" || status === 'error') && (
-          <div className="border rounded-lg p-4 space-y-2 bg-secondary/50">
-             {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-3 overflow-hidden">
-                    {fromIcon}
-                    <span className="font-medium text-sm truncate">{file.name}</span>
-                </div>
-                 <Button variant="ghost" size="icon" onClick={() => setFiles(files.filter((_, i) => i !== index))} aria-label="Remove file">
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-             {files.length > 1 && (
-                 <Button variant="ghost" size="sm" onClick={resetState} className="w-full">
-                    Remove All
-                </Button>
-            )}
-            {files.length === 1 && !multiple && (
-                 <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={resetState} aria-label="Remove file">
-                  <X className="h-4 w-4" />
-                </Button>
-            )}
-          </div>
-        )}
-
-        {status === "file-selected" && params && params.length > 0 && (
-            <div className="grid gap-4">
-                {params.map(param => (
-                    <div key={param.id} className="grid gap-2">
-                        <Label htmlFor={param.id}>{param.label}</Label>
-                        <Input 
-                            id={param.id} 
-                            type={param.type}
-                            placeholder={param.label}
-                            value={additionalParams[param.id] || ''}
-                            onChange={(e) => handleParamChange(param.id, e.target.value)}
-                        />
-                    </div>
-                ))}
-            </div>
-        )}
-
-
-        {status === 'converting' && (
-          <div className="space-y-2 text-center">
-            <Progress value={progress} className="w-full" />
-            <p className="text-sm text-muted-foreground animate-pulse">Converting... {progress}%</p>
-          </div>
-        )}
-        
-        {status === "file-selected" && files.length > 0 && (
-          <Button onClick={handleConvert} className="w-full" size="lg">
-            {actionText}
-          </Button>
-        )}
-
-        {status === "done" && (
-          <div className="grid gap-4 sm:grid-cols-2">
-             <Button onClick={handleDownload} className="w-full" size="lg">
-              <Download className="mr-2 h-4 w-4" />
-              Download File
-            </Button>
-            <Button onClick={resetState} className="w-full" size="lg" variant="outline">
-              Convert Another File
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  }
 }
 
-    
+interface FileDropZoneProps {
+  conversionInfo: ReturnType<typeof getConversionInfo>;
+  status: ConversionStatus;
+  files: File[];
+  additionalParams: Record<string, string>;
+  progress: number;
+  convertedFile: { blob: Blob; name: string } | null;
+  handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  handleParamChange: (id: string, value: string) => void;
+  handleConvert: () => void;
+  handleDownload: () => void;
+  resetState: () => void;
+  setFiles: (files: File[]) => void;
+}
+
+function FileDropZone({
+  conversionInfo,
+  status,
+  files,
+  additionalParams,
+  progress,
+  handleFileChange,
+  handleParamChange,
+  handleConvert,
+  handleDownload,
+  resetState,
+  setFiles,
+}: FileDropZoneProps) {
+  const { fromIcon, toIcon, fromType, actionText, accept, multiple, params } = conversionInfo;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-center items-center gap-6">
+        {fromIcon}
+        <ArrowRight className="h-8 w-8 text-muted-foreground" />
+        {toIcon}
+      </div>
+
+      {status === "idle" || status === "file-selected" ? (
+        <div className="relative border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary transition-colors group">
+          <div className="absolute inset-0 bg-accent opacity-0 group-hover:opacity-10 transition-opacity rounded-lg" />
+          <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="mt-4 font-semibold text-foreground">
+            Drop your {fromType} file{multiple ? 's' : ''} here
+          </p>
+          <p className="text-sm text-muted-foreground">or click to browse</p>
+          <Input
+            id="file-upload"
+            type="file"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onChange={handleFileChange}
+            accept={accept}
+            multiple={multiple}
+            aria-label={`Upload ${fromType} file`}
+          />
+        </div>
+      ) : null}
+
+      {files.length > 0 && (status === "file-selected" || status === "converting" || status === "done" || status === 'error') && (
+        <div className="border rounded-lg p-4 space-y-2 bg-secondary/50">
+           {files.map((file, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center gap-3 overflow-hidden">
+                  {fromIcon}
+                  <span className="font-medium text-sm truncate">{file.name}</span>
+              </div>
+               <Button variant="ghost" size="icon" onClick={() => setFiles(files.filter((_, i) => i !== index))} aria-label="Remove file">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+           {files.length > 1 && (
+               <Button variant="ghost" size="sm" onClick={resetState} className="w-full">
+                  Remove All
+              </Button>
+          )}
+          {files.length === 1 && !multiple && (
+               <Button variant="ghost" size="icon" className="absolute top-2 right-2" onClick={resetState} aria-label="Remove file">
+                <X className="h-4 w-4" />
+              </Button>
+          )}
+        </div>
+      )}
+
+      {status === "file-selected" && params && params.length > 0 && (
+          <div className="grid gap-4">
+              {params.map(param => (
+                  <div key={param.id} className="grid gap-2">
+                      <Label htmlFor={param.id}>{param.label}</Label>
+                      <Input 
+                          id={param.id} 
+                          type={param.type}
+                          placeholder={param.label}
+                          value={additionalParams[param.id] || ''}
+                          onChange={(e) => handleParamChange(param.id, e.target.value)}
+                      />
+                  </div>
+              ))}
+          </div>
+      )}
+
+      {status === 'converting' && (
+        <div className="space-y-2 text-center">
+          <Progress value={progress} className="w-full" />
+          <p className="text-sm text-muted-foreground animate-pulse">Converting... {progress}%</p>
+        </div>
+      )}
+      
+      {status === "file-selected" && files.length > 0 && (
+        <Button onClick={handleConvert} className="w-full" size="lg">
+          {actionText}
+        </Button>
+      )}
+
+      {status === "done" && (
+        <div className="grid gap-4 sm:grid-cols-2">
+           <Button onClick={handleDownload} className="w-full" size="lg">
+            <Download className="mr-2 h-4 w-4" />
+            Download File
+          </Button>
+          <Button onClick={resetState} className="w-full" size="lg" variant="outline">
+            Convert Another File
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
