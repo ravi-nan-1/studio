@@ -1,9 +1,9 @@
 "use server";
 
+import { pingerManager } from './pinger-manager';
+
 const PING_URL = "https://pdf-tools-dljh.onrender.com/ping";
 const PING_INTERVAL = 5 * 60 * 1000; // 5 minutes
-
-let isPinging = false;
 
 async function pingService() {
   try {
@@ -22,14 +22,14 @@ async function pingService() {
 }
 
 export function startPinger() {
-  if (isPinging) {
+  if (pingerManager.isPingerStarted()) {
     console.log("Pinger is already running.");
     return;
   }
 
+  pingerManager.setPingerStarted();
   console.log(`Starting pinger to hit ${PING_URL} every 5 minutes.`);
   // Immediately ping once to start, then set the interval.
   pingService();
   setInterval(pingService, PING_INTERVAL);
-  isPinging = true;
 }
